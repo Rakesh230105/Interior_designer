@@ -6,12 +6,12 @@ import { motion } from 'framer-motion';
 const FeaturedProject = ({ image, title, description, index }) => {
   return (
     <motion.div 
-      className="relative overflow-hidden group rounded-lg"
+      className="relative overflow-hidden group rounded-lg h-96" // Increased height to make images larger
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.2 }}
     >
-      <div className="aspect-w-16 aspect-h-9 bg-gray-200 overflow-hidden rounded-lg">
+      <div className="h-full w-full bg-gray-200 overflow-hidden rounded-lg"> {/* Changed to h-full w-full for consistent sizing */}
         <img 
           src={image} 
           alt={title} 
@@ -52,7 +52,7 @@ const DesignShowcase = () => {
         <div className="w-full h-full relative">
           <div className="absolute inset-0 flex items-center justify-center">
             <img 
-              src="/images/showcase-interior.jpg" 
+              src="https://cdn.bluent.com/images/illustration.webp" 
               alt="Interior Design Showcase" 
               className="w-full h-full object-cover rounded-lg"
             />
@@ -179,9 +179,7 @@ export default function Home() {
               <Link to="/services" onClick={() => window.scrollTo(0, 0)}>
                 <button className="mt-8 font-medium flex items-center group" style={{ color: '#5C31CE' }}>
                   Learn more about our process
-                  <svg xmlns="https://cdn-icons-png.freepik.com/512/399/399640.png" className="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
+                  <img src="https://cdn-icons-png.freepik.com/512/399/399640.png" className="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform" alt="Arrow icon" />
                 </button>
               </Link>
             </motion.div>
@@ -259,7 +257,8 @@ export default function Home() {
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Changed to grid with 2 columns for larger images */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {projects.map((project, index) => (
               <FeaturedProject 
                 key={index}
