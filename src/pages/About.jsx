@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 export default function About() {
   const team = [
     { name: "Ageer Nirvignya", position: "Lead Designer", image: "https://nirvignyageer.netlify.app/images/gana.jpg" },
-    { name: "huvan Tadakamadla", position: "Interior Architect", image: "https://media.licdn.com/dms/image/v2/D5603AQGKwaSVwgoAiQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1727278608756?e=1749686400&v=beta&t=AzpaWlRZnDZaa1duTuptqQNnCfNbNtsVjeDPQqvdH8w" },
+    { name: "Bhuvan Tadakamadla", position: "Interior Architect", image: "https://media.licdn.com/dms/image/v2/D5603AQGKwaSVwgoAiQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1727278608756?e=1749686400&v=beta&t=AzpaWlRZnDZaa1duTuptqQNnCfNbNtsVjeDPQqvdH8w" },
     { name: "Mohammed Mudabbir Pasha", position: "Color Specialist", image: "https://media.licdn.com/dms/image/v2/D5603AQFY2fsEfLc8SA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1719414876635?e=1750291200&v=beta&t=G01r8RAJkM5B8pMvIxUm3pYWTHGewAJSJn0Iq68DUOQ" },
     { name: "Siddeshwar Reddy", position: "Project Manager", image: "https://media.licdn.com/dms/image/v2/D4E03AQHecSdbFQ7CQQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1718815620182?e=1750291200&v=beta&t=FjPV45oDhv6SqimbxgdCTEea57UFjvTRzLwiY4ZGR8k" }
   ];

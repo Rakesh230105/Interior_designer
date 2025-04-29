@@ -7,6 +7,8 @@ export default function AllProjects() {
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   // Filter categories
   const categories = [
@@ -17,122 +19,47 @@ export default function AllProjects() {
     { id: 'retail', name: 'Retail' }
   ];
 
-  // Project data
+  // Fetch projects from PHP backend
   useEffect(() => {
-    // In a real app, this might be an API call
-    const projectData = [
-      { 
-        id: 1, 
-        title: "Modern Apartment Renovation", 
-        category: "residential", 
-        location: "New York, NY",
-        year: "2023",
-        image: "https://images.adsttc.com/media/images/5be3/3bc4/08a5/e549/e300/031a/newsletter/42449.jpg?1541618579",
-        rating: 4.8
-      },
-      { 
-        id: 2, 
-        title: "Tech Startup Office", 
-        category: "commercial", 
-        location: "San Francisco, CA",
-        year: "2023",
-        image: "https://img.freepik.com/free-photo/full-shot-students-studying-indoors_23-2149647036.jpg?semt=ais_hybrid&w=740",
-        rating: 4.9
-      },
-      { 
-        id: 3, 
-        title: "Boutique Hotel Lobby", 
-        category: "hospitality", 
-        location: "Miami, FL",
-        year: "2022",
-        image: "https://media.istockphoto.com/id/1369030854/photo/3d-render-of-luxury-hotel-lobby-and-reception.jpg?s=612x612&w=0&k=20&c=obw_JfMCUfb26jO0JkYSiXOkc8Tli9vPsGmw3fLgjIc=",
-        rating: 4.7
-      },
-      { 
-        id: 4, 
-        title: "Luxury Villa", 
-        category: "residential", 
-        location: "Malibu, CA",
-        year: "2023",
-        image: "https://www.laurameroni.com/sites/default/files/styles/16_9_large/public/blocco_a/laurameroni_modern-villa-interior-architecture_01_0.jpg.webp?itok=dQ6PpB4m",
-        rating: 5.0
-      },
-      { 
-        id: 5, 
-        title: "Fashion Retail Store", 
-        category: "retail", 
-        location: "Chicago, IL",
-        year: "2022",
-        image: "https://i.pinimg.com/736x/4c/74/ef/4c74efa3c255b74c40633f44525e9cd1.jpg",
-        rating: 4.6
-      },
-      { 
-        id: 6, 
-        title: "Urban Loft Conversion", 
-        category: "residential", 
-        location: "Boston, MA",
-        year: "2022",
-        image: "https://www.constructionplacements.com/wp-content/uploads/2024/01/Luxury-Loft-Living-in-London-How-to-Create-Your-Dream-Space.jpg",
-        rating: 4.8
-      },
-      { 
-        id: 7, 
-        title: "Beachfront Restaurant", 
-        category: "hospitality", 
-        location: "San Diego, CA",
-        year: "2023",
-        image: "https://cdn.shopify.com/s/files/1/0104/1524/3330/files/098-DS-Scorpios-_2.jpg?v=1623919507",
-        rating: 4.9
-      },
-      { 
-        id: 8, 
-        title: "Corporate Headquarters", 
-        category: "commercial", 
-        location: "Seattle, WA",
-        year: "2022",
-        image: "https://officebanao.com/wp-content/uploads/2023/12/modern-interior-open-office-workspace.jpg",
-        rating: 4.7
-      },
-      { 
-        id: 9, 
-        title: "Modern Farmhouse", 
-        category: "residential", 
-        location: "Portland, OR",
-        year: "2022",
-        image: "https://cdn.prod.website-files.com/602c75ed03e1145b5fac2aed/642aeb14be3a5fc9960902e6_AdobeStock_427117237.jpeg",
-        rating: 4.5
-      },
-      { 
-        id: 10, 
-        title: "Boutique Clothing Store", 
-        category: "retail", 
-        location: "Austin, TX",
-        year: "2023",
-        image: "https://www.shutterstock.com/image-photo/luxury-fashionable-brand-new-interior-600nw-191362898.jpg",
-        rating: 4.8
-      },
-      { 
-        id: 11, 
-        title: "Rooftop Bar", 
-        category: "hospitality", 
-        location: "Denver, CO",
-        year: "2023",
-        image: "https://sdg-migration-id.s3.amazonaws.com/Interior-Design-Basile-Studio-BornRaised-San-Diego-outdoor-16.jpg",
-        rating: 4.9
-      },
-      { 
-        id: 12, 
-        title: "Coworking Space", 
-        category: "commercial", 
-        location: "Nashville, TN",
-        year: "2022",
-        image: "https://officebanao.com/wp-content/uploads/2024/08/modern-interior-design-office-1-1024x683.jpg",
-        rating: 4.6
-      },
-    ];
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch('http://localhost/interior/get_projects.php', {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          throw new Error(`Invalid response format. Expected JSON but got: ${text.substring(0, 100)}`);
+        }
+        
+        const data = await response.json();
+        
+        // Validate the received data structure
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid data format: Expected an array of projects');
+        }
+        
+        setProjects(data);
+        setFilteredProjects(data);
+      } catch (err) {
+        console.error("Error fetching projects:", err);
+        setError(err.message || 'Failed to load projects. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    setProjects(projectData);
-    setFilteredProjects(projectData);
+    fetchProjects();
   }, []);
 
   // Handle filter changes
@@ -143,8 +70,8 @@ export default function AllProjects() {
       setFilteredProjects(
         searchQuery 
           ? projects.filter(project => 
-              project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              project.location.toLowerCase().includes(searchQuery.toLowerCase())
+              project.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              project.location?.toLowerCase().includes(searchQuery.toLowerCase())
             )
           : projects
       );
@@ -153,8 +80,8 @@ export default function AllProjects() {
         projects.filter(project => 
           project.category === category && 
           (searchQuery 
-            ? project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              project.location.toLowerCase().includes(searchQuery.toLowerCase())
+            ? project.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              project.location?.toLowerCase().includes(searchQuery.toLowerCase())
             : true
           )
         )
@@ -171,8 +98,8 @@ export default function AllProjects() {
       setFilteredProjects(
         query 
           ? projects.filter(project => 
-              project.title.toLowerCase().includes(query.toLowerCase()) ||
-              project.location.toLowerCase().includes(query.toLowerCase())
+              project.title?.toLowerCase().includes(query.toLowerCase()) ||
+              project.location?.toLowerCase().includes(query.toLowerCase())
             )
           : projects
       );
@@ -181,8 +108,8 @@ export default function AllProjects() {
         projects.filter(project => 
           project.category === activeFilter && 
           (query 
-            ? project.title.toLowerCase().includes(query.toLowerCase()) ||
-              project.location.toLowerCase().includes(query.toLowerCase())
+            ? project.title?.toLowerCase().includes(query.toLowerCase()) ||
+              project.location?.toLowerCase().includes(query.toLowerCase())
             : true
           )
         )
@@ -192,8 +119,11 @@ export default function AllProjects() {
 
   // Function to render star rating
   const renderStarRating = (rating) => {
-    const fullStars = Math.floor(rating);
-    const halfStar = rating % 1 >= 0.5;
+    if (!rating) return null;
+    
+    const numericRating = typeof rating === 'string' ? parseFloat(rating) : rating;
+    const fullStars = Math.floor(numericRating);
+    const halfStar = numericRating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
     
     return (
@@ -231,11 +161,12 @@ export default function AllProjects() {
           </svg>
         ))}
         
-        <span className="ml-1 text-xs font-medium text-gray-100">{rating.toFixed(1)}</span>
+        <span className="ml-1 text-xs font-medium text-gray-100">{numericRating.toFixed(1)}</span>
       </div>
     );
   };
 
+  // Rest of your component remains the same...
   return (
     <div className="bg-white">
       {/* Hero Section */}
@@ -319,70 +250,104 @@ export default function AllProjects() {
             </motion.div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="col-span-full text-center py-16">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-700 border-t-transparent"></div>
+              <p className="mt-4 text-gray-600">Loading projects...</p>
+            </div>
+          )}
+          
+          {/* Error State */}
+          {error && (
+            <div className="col-span-full text-center py-16 bg-red-50 rounded-lg">
+              <svg className="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h3 className="mt-4 text-xl font-medium text-gray-700">Error loading projects</h3>
+              <p className="mt-2 text-gray-500">{error}</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-4 px-6 py-2 bg-purple-700 text-white rounded-md hover:bg-purple-800 transition-colors"
+                style={{ backgroundColor: '#5C31CE' }}
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+
           {/* Project Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
-                >
-                  <Link to={`/projects/${project.id}`} className="block">
-                    <div className="relative overflow-hidden h-64">
-                      {/* Rating Badge */}
-                      <div className="absolute top-3 right-3 z-10 bg-black/70 px-3 py-1 rounded-full">
-                        {renderStarRating(project.rating)}
+          {!loading && !error && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredProjects.length > 0 ? (
+                filteredProjects.map((project) => (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
+                  >
+                    <Link 
+                      to={`/projects/${project.id}`} 
+                      className="block"
+                      onClick={() => window.scrollTo(0, 0)}
+                    >
+                      <div className="relative overflow-hidden h-64">
+                        {/* Rating Badge */}
+                        {project.rating && (
+                          <div className="absolute top-3 right-3 z-10 bg-black/70 px-3 py-1 rounded-full">
+                            {renderStarRating(project.rating)}
+                          </div>
+                        )}
+                        
+                        <img 
+                          src={project.image || 'https://via.placeholder.com/400x300?text=Project+Image'} 
+                          alt={project.title || 'Project image'}
+                          className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                          <span className="inline-block px-3 py-1 text-xs bg-purple-700 text-white rounded-full mb-2">
+                            {categories.find(cat => cat.id === project.category)?.name || 'Uncategorized'}
+                          </span>
+                          <h3 className="text-xl font-semibold text-white">{project.title || 'Untitled Project'}</h3>
+                          <p className="text-gray-200 flex items-center">
+                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {project.location || 'Location not specified'} · {project.year || 'Year not specified'}  
+                          </p>
+                        </div>
                       </div>
-                      
-                      <img 
-                        src={project.image} 
-                        alt={project.title}
-                        className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                        <span className="inline-block px-3 py-1 text-xs bg-purple-700 text-white rounded-full mb-2">
-                          {categories.find(cat => cat.id === project.category)?.name}
-                        </span>
-                        <h3 className="text-xl font-semibold text-white">{project.title}</h3>
-                        <p className="text-gray-200 flex items-center">
-                          <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          {project.location} · {project.year}  
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-16">
-                <svg className="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h3 className="mt-4 text-xl font-medium text-gray-700">No projects found</h3>
-                <p className="mt-2 text-gray-500">Try adjusting your search or filter to find what you're looking for.</p>
-                <button 
-                  onClick={() => {
-                    setActiveFilter('all');
-                    setSearchQuery('');
-                    setFilteredProjects(projects);
-                  }}
-                  className="mt-4 px-6 py-2 bg-purple-700 text-white rounded-md hover:bg-purple-800 transition-colors"
-                  style={{ backgroundColor: '#5C31CE' }}
-                >
-                  Reset Filters
-                </button>
-              </div>
-            )}
-          </div>
+                    </Link>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-16">
+                  <svg className="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h3 className="mt-4 text-xl font-medium text-gray-700">No projects found</h3>
+                  <p className="mt-2 text-gray-500">Try adjusting your search or filter to find what you're looking for.</p>
+                  <button 
+                    onClick={() => {
+                      setActiveFilter('all');
+                      setSearchQuery('');
+                      setFilteredProjects(projects);
+                    }}
+                    className="mt-4 px-6 py-2 bg-purple-700 text-white rounded-md hover:bg-purple-800 transition-colors"
+                    style={{ backgroundColor: '#5C31CE' }}
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Pagination - Optional for future enhancement */}
-          {filteredProjects.length > 0 && (
+          {!loading && !error && filteredProjects.length > 0 && (
             <div className="mt-16 flex justify-center">
               <nav className="flex items-center space-x-1">
                 <button className="px-3 py-2 rounded-md text-gray-500 hover:bg-gray-100">
@@ -432,6 +397,7 @@ export default function AllProjects() {
           >
             <Link 
               to="/contact" 
+              onClick={() => window.scrollTo(0, 0)}
               className="inline-block px-8 py-4 bg-purple-700 text-white font-medium rounded-md hover:bg-purple-800 transition-colors"
               style={{ backgroundColor: '#5C31CE' }}
             >

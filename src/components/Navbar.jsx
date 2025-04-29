@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-const Navbar = () => {
+const Navbar = ({ user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
@@ -28,7 +28,7 @@ const Navbar = () => {
     setIsOpen(false);
   }, [location.pathname]);
 
-  // Navigation links - kept all links including Blog
+  // Navigation links
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/about', label: 'About' },
@@ -38,11 +38,22 @@ const Navbar = () => {
     { path: '/contact', label: 'Contact' }
   ];
 
-  // Check if link is active - improved logic
+  // Add admin link if user is admin
+  if (user?.isAdmin) {
+    navLinks.push({ path: '/admin/dashboard', label: 'Admin' });
+  }
+
+  // Check if link is active
   const isActive = (path) => {
     if (path === '/' && location.pathname === '/') return true;
     if (path !== '/' && location.pathname.startsWith(path)) return true;
     return false;
+  };
+
+  // Get user greeting based on role
+  const getUserGreeting = () => {
+    if (!user) return '';
+    return user.isAdmin ? 'Hi, Admin' : 'Hi, User';
   };
 
   return (
@@ -86,12 +97,28 @@ const Navbar = () => {
               ))}
             </div>
             
-            <Link 
-              to="/contact" 
-              className="ml-4 px-5 py-2 bg-yellow-400 text-gray-900 rounded-md font-medium hover:bg-yellow-500 transition-colors"
-            >
-              Free Consultation
-            </Link>
+            {user ? (
+              <div className="ml-4 flex items-center space-x-2">
+                <span className={`text-sm font-medium ${
+                  scrolled ? 'text-gray-700' : 'text-gray-800'
+                }`}>
+                  {getUserGreeting()}
+                </span>
+                <button 
+                  onClick={onLogout}
+                  className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link 
+                to="/login" 
+                className="ml-4 px-5 py-2 bg-yellow-400 text-gray-900 rounded-md font-medium hover:bg-yellow-500 transition-colors"
+              >
+                Login
+              </Link>
+            )}
           </div>
           
           {/* Mobile menu button */}
@@ -137,14 +164,27 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <div className="px-4 py-4 border-t border-gray-100">
-                <Link 
-                  to="/contact" 
-                  className="block w-full text-center px-4 py-3 bg-yellow-400 text-gray-900 rounded-md font-medium hover:bg-yellow-500 transition-colors"
-                >
-                  Free Consultation
-                </Link>
-              </div>
+              
+              {user ? (
+                <div className="px-4 py-3 border-t border-gray-100">
+                  <p className="text-sm text-gray-700 mb-2">{getUserGreeting()}</p>
+                  <button 
+                    onClick={onLogout}
+                    className="block w-full text-center px-4 py-2 bg-gray-600 text-white rounded-md font-medium hover:bg-gray-700 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="px-4 py-4 border-t border-gray-100">
+                  <Link 
+                    to="/login" 
+                    className="block w-full text-center px-4 py-3 bg-yellow-400 text-gray-900 rounded-md font-medium hover:bg-yellow-500 transition-colors"
+                  >
+                    Login
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
