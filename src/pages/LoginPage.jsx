@@ -45,7 +45,7 @@ export default function Login({ setUser }) {
         // Update app state
         setUser(userObject);
         
-        // Redirect based on user type
+        // Redirect based on user type - Admin goes to dashboard, User goes to home
         if (data.isAdmin === "1" || data.isAdmin === 1) {
           navigate('/admin/dashboard');
         } else {
